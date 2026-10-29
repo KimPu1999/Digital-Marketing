@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+:root {
+  --primary: #143d8d;
+  --accent: #2563eb;
+  --dark-navy: #0f172a;
+  --background: #ffffff;
+  --surface: #f8fafc;
+  --border: #e2e8f0;
+  --success: #16a34a;
+  --error: #dc2626;
+}
+
+@theme inline {
+  --color-primary: var(--primary);
+  --color-accent: var(--accent);
+  --color-dark-navy: var(--dark-navy);
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --font-sans: "Plus Jakarta Sans", "Noto Sans Myanmar", Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--background); color: var(--dark-navy); font-family: "Plus Jakarta Sans", "Noto Sans Myanmar", Arial, sans-serif; }
+a { text-decoration: none; }
+button, a { -webkit-tap-highlight-color: transparent; }
+::selection { background: #bfdbfe; color: #0f172a; }

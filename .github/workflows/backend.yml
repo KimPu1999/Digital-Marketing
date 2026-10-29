@@ -1,0 +1,85 @@
+name: Backend checks
+
+on:
+  push:
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend.yml"
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: backend
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: northstar_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d northstar_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, pgsql, pdo_pgsql
+          coverage: none
+      - name: Validate Composer manifest
+        run: composer validate --no-check-publish
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate --force
+        env:
+          APP_ENV: testing
+          APP_DEBUG: true
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: northstar_test
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
+          SESSION_DRIVER: array
+          CACHE_STORE: array
+          QUEUE_CONNECTION: sync
+          MAIL_MAILER: array
+      - name: PHP syntax
+        run: find app routes config bootstrap database tests -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: Run Laravel tests
+        run: php artisan test
+        env:
+          APP_ENV: testing
+          APP_DEBUG: true
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: northstar_test
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
+          SESSION_DRIVER: array
+          CACHE_STORE: array
+          QUEUE_CONNECTION: sync
+          MAIL_MAILER: array
